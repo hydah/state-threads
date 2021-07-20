@@ -2,6 +2,10 @@ project(state-threads)
 
 cmake_minimum_required(VERSION 2.6)
 
+if(CMAKE_PROJECT_NAME STREQUAL "state-threads")
+  option(ST_BUILD_EXT "Build st ext" ON)
+endif()
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug")
 endif(NOT CMAKE_BUILD_TYPE)
@@ -22,6 +26,7 @@ if(NOT VALGRIND_H)
   add_definitions(-DNVALGRIND)
 endif(NOT VALGRIND_H)
 
+
 exec_program(${CMAKE_COMMAND} ARGS -E copy ${CMAKE_CURRENT_SOURCE_DIR}/public.h ${CMAKE_CURRENT_BINARY_DIR}/st.h)
 # use gcc for the asm file because it needs to be
 # pre-processed by cpp first
@@ -32,10 +37,13 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_executable(server examples/server.c examples/error.c)
 target_link_libraries(server st)
 
-add_executable(lookupdns examples/lookupdns.c examples/res.c)
-target_link_libraries(lookupdns st resolv)
+if(ST_BUILD_EXT)
+  add_executable(lookupdns examples/lookupdns.c examples/res.c)
+  target_link_libraries(lookupdns st resolv)
 
-add_executable(threaded examples/threaded.c)
-target_link_libraries(threaded st)
+  add_executable(threaded examples/threaded.c)
+  target_link_libraries(threaded st)
 
-add_subdirectory(extensions)
+  add_subdirectory(extensions)
+endif()
+
